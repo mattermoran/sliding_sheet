@@ -71,10 +71,11 @@ class _ExampleState extends State<Example> {
       elevation: 12,
       maxWidth: 500,
       cornerRadius: 16,
-      cornerRadiusOnFullscreen: 0.0,
+      margin: EdgeInsets.symmetric(horizontal: 24),
+      marginWhenExpanded: EdgeInsets.zero,
       closeOnBackdropTap: true,
-      closeOnBackButtonPressed: true,
-      addTopViewPaddingOnFullscreen: true,
+      closeSheetOnBackButtonPressed: true,
+      avoidStatusBar: true,
       isBackdropInteractable: true,
       border: Border.all(
         color: Colors.grey.shade300,
@@ -166,8 +167,8 @@ class _ExampleState extends State<Example> {
       Icon icon,
       Text text,
       VoidCallback onTap, {
-      BorderSide border,
-      Color color,
+      BorderSide? border,
+      Color? color,
     }) {
       final child = Row(
         mainAxisSize: MainAxisSize.min,
@@ -217,7 +218,7 @@ class _ExampleState extends State<Example> {
             ),
             () async {
               // Inherit from context...
-              await SheetController.of(context).hide();
+              await SheetController.of(context)?.hide();
               Future.delayed(const Duration(milliseconds: 1500), () {
                 // or use the controller
                 controller.show();
@@ -481,7 +482,7 @@ class _ExampleState extends State<Example> {
       // The builder to build the dialog. Calling rebuilder on the dialogController
       // will call the builder, allowing react to state changes while the sheet is shown.
       builder: (context) {
-        return SlidingSheetDialog(
+        return SlidingSheet(
           controller: controller,
           duration: const Duration(milliseconds: 500),
           snapSpec: const SnapSpec(
@@ -496,10 +497,11 @@ class _ExampleState extends State<Example> {
             showScrollbar: true,
           ),
           color: Colors.teal,
+          backdropColor: Colors.black26,
           maxWidth: 500,
           minHeight: 700,
           isDismissable: isDismissable,
-          dismissOnBackdropTap: true,
+          closeOnBackdropTap: true,
           isBackdropInteractable: true,
           onDismissPrevented: (backButton, backDrop) async {
             HapticFeedback.heavyImpact();
@@ -526,7 +528,7 @@ class _ExampleState extends State<Example> {
                 children: <Widget>[
                   Text(
                     'Confirm purchase',
-                    style: textTheme.headline4.copyWith(
+                    style: textTheme.headline4?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -537,7 +539,7 @@ class _ExampleState extends State<Example> {
                       Expanded(
                         child: Text(
                           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sagittis tellus lacus, et pulvinar orci eleifend in.',
-                          style: textTheme.subtitle1.copyWith(
+                          style: textTheme.subtitle1?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -566,7 +568,7 @@ class _ExampleState extends State<Example> {
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       'Cancel',
-                      style: textTheme.subtitle1.copyWith(
+                      style: textTheme.subtitle1?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -577,14 +579,14 @@ class _ExampleState extends State<Example> {
                     onPressed: () {
                       if (!isDismissable) {
                         isDismissable = true;
-                        SheetController.of(context).rebuild();
+                        SheetController.of(context)?.rebuild();
                       } else {
                         Navigator.pop(context);
                       }
                     },
                     child: Text(
                       'Approve',
-                      style: textTheme.subtitle1.copyWith(
+                      style: textTheme.subtitle1?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),

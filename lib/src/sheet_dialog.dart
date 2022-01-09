@@ -13,23 +13,22 @@ part of 'sheet.dart';
 /// the content bottom sheet.
 Future<T?> showSlidingBottomSheet<T>(
   BuildContext context, {
-  required SlidingSheetDialog Function(BuildContext context) builder,
+  required SlidingSheet Function(BuildContext context) builder,
   Widget Function(BuildContext context, SlidingSheet sheet)? parentBuilder,
   RouteSettings? routeSettings,
   bool useRootNavigator = false,
   bool resizeToAvoidBottomInset = true,
 }) {
-  SlidingSheetDialog dialog = builder(context);
-  final SheetController controller = dialog.controller ?? SheetController();
+  SlidingSheet dialog = builder(context);
 
-  final theme = Theme.of(context);
+  final SheetController controller = dialog.controller ?? SheetController();
   final ValueNotifier<int> rebuilder = ValueNotifier(0);
 
   return Navigator.of(
     context,
     rootNavigator: useRootNavigator,
   ).push(
-    _SlidingSheetRoute(
+    _SheetRoute(
       duration: dialog.duration,
       settings: routeSettings,
       builder: (context, animation, route) {
@@ -45,50 +44,7 @@ Future<T?> showSlidingBottomSheet<T>(
               rebuilder.value++;
             };
 
-            var snapSpec = dialog.snapSpec;
-            if (snapSpec.snappings.first != 0.0) {
-              snapSpec = snapSpec.copyWith(
-                snappings: [0.0] + snapSpec.snappings,
-              );
-            }
-
-            Widget sheet = SlidingSheet._(
-              route: route,
-              controller: controller,
-              builder: dialog.builder,
-              customBuilder: dialog.customBuilder,
-              headerBuilder: dialog.headerBuilder,
-              footerBuilder: dialog.footerBuilder,
-              listener: dialog.listener,
-              snapSpec: snapSpec,
-              duration: dialog.duration,
-              color: dialog.color ??
-                  theme.bottomSheetTheme.backgroundColor ??
-                  theme.dialogTheme.backgroundColor ??
-                  theme.dialogBackgroundColor,
-              backdropColor: dialog.backdropColor,
-              shadowColor: dialog.shadowColor,
-              elevation: dialog.elevation,
-              padding: dialog.padding,
-              avoidStatusBar: dialog.avoidStatusBar,
-              margin: dialog.margin,
-              border: dialog.border,
-              cornerRadius: dialog.cornerRadius,
-              cornerRadiusOnFullscreen: dialog.cornerRadiusOnFullscreen,
-              closeOnBackdropTap: dialog.dismissOnBackdropTap,
-              scrollSpec: dialog.scrollSpec,
-              maxWidth: dialog.maxWidth,
-              closeSheetOnBackButtonPressed: false,
-              minHeight: dialog.minHeight,
-              isDismissable: dialog.isDismissable,
-              onDismissPrevented: dialog.onDismissPrevented,
-              isBackdropInteractable: dialog.isBackdropInteractable,
-              axisAlignment: dialog.axisAlignment,
-              extendBody: dialog.extendBody,
-              liftOnScrollHeaderElevation: dialog.liftOnScrollHeaderElevation,
-              liftOnScrollFooterElevation: dialog.liftOnScrollFooterElevation,
-              body: null,
-            );
+            Widget sheet = dialog;
 
             if (parentBuilder != null) {
               sheet = parentBuilder(context, sheet as SlidingSheet);
@@ -111,136 +67,11 @@ Future<T?> showSlidingBottomSheet<T>(
   );
 }
 
-/// A wrapper class to show a [SlidingSheet] as a bottom sheet dialog.
-class SlidingSheetDialog {
-  /// {@macro sliding_sheet.builder}
-  final SheetBuilder? builder;
-
-  /// {@macro sliding_sheet.customBuilder}
-  final CustomSheetBuilder? customBuilder;
-
-  /// {@macro sliding_sheet.headerBuilder}
-  final SheetBuilder? headerBuilder;
-
-  /// {@macro sliding_sheet.footerBuilder}
-  final SheetBuilder? footerBuilder;
-
-  /// {@macro sliding_sheet.snapSpec}
-  final SnapSpec snapSpec;
-
-  /// {@macro sliding_sheet.duration}
-  final Duration duration;
-
-  /// {@macro sliding_sheet.color}
-  final Color? color;
-
-  /// {@macro sliding_sheet.backdropColor}
-  final Color backdropColor;
-
-  /// {@macro sliding_sheet.shadowColor}
-  final Color? shadowColor;
-
-  /// {@macro sliding_sheet.elevation}
-  final double elevation;
-
-  /// {@macro sliding_sheet.padding}
-  final EdgeInsets? padding;
-
-  /// {@macro sliding_sheet.avoidStatusBar}
-  final bool avoidStatusBar;
-
-  /// {@macro sliding_sheet.margin}
-  final EdgeInsets? margin;
-
-  /// {@macro sliding_sheet.border}
-  final Border? border;
-
-  /// {@macro sliding_sheet.cornerRadius}
-  final double cornerRadius;
-
-  /// {@macro sliding_sheet.cornerRadiusOnFullscreen}
-  final double? cornerRadiusOnFullscreen;
-
-  /// If true, the sheet will be dismissed the backdrop
-  /// was tapped.
-  final bool dismissOnBackdropTap;
-
-  /// {@macro sliding_sheet.listener}
-  final SheetListener? listener;
-
-  /// {@macro sliding_sheet.controller}
-  final SheetController? controller;
-
-  /// {@macro sliding_sheet.scrollSpec}
-  final ScrollSpec scrollSpec;
-
-  /// {@macro sliding_sheet.maxWidth}
-  final double maxWidth;
-
-  /// {@macro sliding_sheet.minHeight}
-  final double? minHeight;
-
-  /// {@macro sliding_sheet.isDismissable}
-  final bool isDismissable;
-
-  /// {@macro sliding_sheet.onDismissPrevented}
-  final OnDismissPreventedCallback? onDismissPrevented;
-
-  /// {@macro sliding_sheet.isBackDropInteractable}
-  final bool isBackdropInteractable;
-
-  /// {@macro sliding_sheet.axisAlignment}
-  final double axisAlignment;
-
-  /// {@macro sliding_sheet.extendBody}
-  final bool extendBody;
-
-  /// {@macro sliding_sheet.liftOnScrollHeaderElevation}
-  final double liftOnScrollHeaderElevation;
-
-  /// {@macro sliding_sheet.liftOnScrollFooterElevation}
-  final double liftOnScrollFooterElevation;
-
-  /// Creates a wrapper class to show a [SlidingSheet] as a bottom sheet dialog.
-  const SlidingSheetDialog({
-    this.builder,
-    this.customBuilder,
-    this.headerBuilder,
-    this.footerBuilder,
-    this.snapSpec = const SnapSpec(),
-    this.duration = const Duration(milliseconds: 800),
-    this.color,
-    this.backdropColor = Colors.black54,
-    this.shadowColor,
-    this.elevation = 0.0,
-    this.padding,
-    this.avoidStatusBar = false,
-    this.margin,
-    this.border,
-    this.cornerRadius = 0.0,
-    this.cornerRadiusOnFullscreen,
-    this.dismissOnBackdropTap = true,
-    this.listener,
-    this.controller,
-    this.scrollSpec = const ScrollSpec(overscroll: false),
-    this.maxWidth = double.infinity,
-    this.minHeight,
-    this.isDismissable = true,
-    this.onDismissPrevented,
-    this.isBackdropInteractable = false,
-    this.axisAlignment = 0.0,
-    this.extendBody = false,
-    this.liftOnScrollHeaderElevation = 0.0,
-    this.liftOnScrollFooterElevation = 0.0,
-  });
-}
-
 /// A transparent route for a bottom sheet dialog.
-class _SlidingSheetRoute<T> extends PageRoute<T> {
-  final Widget Function(BuildContext, Animation<double>, _SlidingSheetRoute<T>)
-      builder;
+class _SheetRoute<T> extends PageRoute<T> {
+  final Widget Function(BuildContext, Animation<double>, _SheetRoute<T>) builder;
   final Duration duration;
-  _SlidingSheetRoute({
+  _SheetRoute({
     required this.builder,
     required this.duration,
     RouteSettings? settings,
@@ -248,6 +79,10 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
           settings: settings,
           fullscreenDialog: false,
         );
+
+  static Route? of(BuildContext context) {
+    return context.findAncestorWidgetOfExactType<_RouteHost>()?.route;
+  }
 
   @override
   bool get opaque => false;
@@ -272,6 +107,23 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) =>
-      builder(context, animation, this);
+  ) {
+    return _RouteHost(
+      route: this,
+      child: builder(context, animation, this),
+    );
+  }
+}
+
+class _RouteHost extends StatelessWidget {
+  final Route route;
+  final Widget child;
+  const _RouteHost({
+    Key? key,
+    required this.route,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => child;
 }

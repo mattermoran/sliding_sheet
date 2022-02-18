@@ -302,7 +302,7 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
       builder(context, animation, this);
 }
 
-class SlidingSheetExtentNotifier extends ValueNotifier {
+class SlidingSheetExtentNotifier extends ValueNotifier<double> {
   SlidingSheetExtentNotifier() : super(0);
 
   @protected

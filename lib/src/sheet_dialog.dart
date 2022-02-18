@@ -14,6 +14,8 @@ part of 'sheet.dart';
 Future<T?> showSlidingBottomSheet<T>(
   BuildContext context, {
   required SlidingSheetDialog Function(BuildContext context) builder,
+  SlidingSheetExtentNotifier? extentNotifier,
+  bool isOpaque = false,
   Widget Function(BuildContext context, SlidingSheet sheet)? parentBuilder,
   RouteSettings? routeSettings,
   bool useRootNavigator = false,
@@ -32,6 +34,8 @@ Future<T?> showSlidingBottomSheet<T>(
     _SlidingSheetRoute(
       duration: dialog.duration,
       settings: routeSettings,
+      extentNotifier: extentNotifier,
+      isOpaque: isOpaque,
       builder: (context, animation, route) {
         return ValueListenableBuilder(
           valueListenable: rebuilder,
@@ -59,7 +63,10 @@ Future<T?> showSlidingBottomSheet<T>(
               customBuilder: dialog.customBuilder,
               headerBuilder: dialog.headerBuilder,
               footerBuilder: dialog.footerBuilder,
-              listener: dialog.listener,
+              listener: (state) {
+                extentNotifier?.setExtent(state.extent);
+                dialog.listener?.call(state);
+              },
               snapSpec: snapSpec,
               duration: dialog.duration,
               color: dialog.color ??
@@ -240,17 +247,27 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
   final Widget Function(BuildContext, Animation<double>, _SlidingSheetRoute<T>)
       builder;
   final Duration duration;
+  final SlidingSheetExtentNotifier? extentNotifier;
+  final bool isOpaque;
   _SlidingSheetRoute({
     required this.builder,
     required this.duration,
+    required this.extentNotifier,
+    this.isOpaque = false,
     RouteSettings? settings,
   }) : super(
           settings: settings,
           fullscreenDialog: false,
-        );
+        ) {
+    if (extentNotifier != null) {
+      extentNotifier!.addListener(() {
+        animationController?.value = extentNotifier!.value;
+      });
+    }
+  }
 
   @override
-  bool get opaque => false;
+  bool get opaque => isOpaque;
 
   @override
   bool get barrierDismissible => false;
@@ -267,6 +284,15 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
   @override
   Duration get transitionDuration => duration;
 
+  AnimationController? animationController;
+
+  @override
+  AnimationController createAnimationController() {
+    animationController = BottomSheet.createAnimationController(navigator!);
+
+    return animationController!;
+  }
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -274,4 +300,14 @@ class _SlidingSheetRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) =>
       builder(context, animation, this);
+}
+
+class SlidingSheetExtentNotifier extends ValueNotifier {
+  SlidingSheetExtentNotifier() : super(0);
+
+  @protected
+  setExtent(double extent) {
+    this.value = extent;
+    notifyListeners();
+  }
 }
